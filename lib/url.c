@@ -727,6 +727,13 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   DEBUGASSERT(data);
   infof(data, "Closing connection %ld\n", conn->connection_id);
 
+  if(conn->connect_state) {
+    /* If this was closed with a CONNECT in progress, cleanup this temporary
+       struct arrangement */
+    data->req.p.http = NULL;
+    Curl_safefree(conn->connect_state->prot_save);
+  }
+
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(data);
 
